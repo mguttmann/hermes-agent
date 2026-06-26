@@ -10,6 +10,7 @@ import { triggerHaptic } from '@/lib/haptics'
 import { Check, Download, Loader2, Palette, Trash2 } from '@/lib/icons'
 import { selectableCardClass } from '@/lib/selectable-card'
 import { cn } from '@/lib/utils'
+import { $embedMode, type EmbedMode, setEmbedMode } from '@/store/embed-consent'
 import { $activeGatewayProfile, $profiles, normalizeProfileKey } from '@/store/profile'
 import { $toolViewMode, setToolViewMode } from '@/store/tool-view'
 import { $translucency, setTranslucency } from '@/store/translucency'
@@ -215,6 +216,7 @@ export function AppearanceSettings() {
   const { t, isSavingLocale } = useI18n()
   const { themeName, mode, resolvedMode, availableThemes, setTheme, setMode } = useTheme()
   const toolViewMode = useStore($toolViewMode)
+  const embedMode = useStore($embedMode)
   const translucency = useStore($translucency)
   const profiles = useStore($profiles)
   const activeProfileKey = normalizeProfileKey(useStore($activeGatewayProfile))
@@ -265,6 +267,12 @@ export function AppearanceSettings() {
     { id: 'product', label: a.product },
     { id: 'technical', label: a.technical }
   ] as const
+
+  const embedOptions = [
+    { id: 'ask', label: a.embedsAsk },
+    { id: 'always', label: a.embedsAlways },
+    { id: 'off', label: a.embedsOff }
+  ] as const satisfies readonly { id: EmbedMode; label: string }[]
 
   return (
     <SettingsContent>
@@ -424,6 +432,21 @@ export function AppearanceSettings() {
             }
             description={a.toolViewDesc}
             title={a.toolViewTitle}
+          />
+
+          <ListRow
+            action={
+              <SegmentedControl
+                onChange={id => {
+                  triggerHaptic('selection')
+                  setEmbedMode(id)
+                }}
+                options={embedOptions}
+                value={embedMode}
+              />
+            }
+            description={a.embedsDesc}
+            title={a.embedsTitle}
           />
         </div>
       </div>
